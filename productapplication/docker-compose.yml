@@ -1,0 +1,54 @@
+version: '3.3'
+services:
+  productservice:
+    image: product_image
+    container_name: product_container
+    build: userproductservice/
+    restart: always
+    network_mode: host
+    ports:
+      - 8090:8090
+      - 8091:8091
+      - 8092:8092
+    depends_on:
+      - mongoservice
+      - eurekaserver
+
+  mongoservice:
+    image: mongo:3.2-jessie
+    container_name: mongo_container
+    ports:
+      - 27017:27017
+    network_mode: host
+
+  userauthenticationservice:
+    container_name: userauthentication_container
+    image: userauthentication_image
+    network_mode: host
+    build: userauthenticationservice/
+    restart: always
+    ports:
+      - 8085:8085
+    depends_on:
+      - mysqlservice
+      - eurekaserver
+
+  mysqlservice:
+    image: mysql:5.5
+    ports:
+      - 3306:3306
+    container_name: mysql_container
+    network_mode: host
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USERNAME: user
+      MYSQL_PASSWORD: root
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+
+  eurekaserver:
+    image: eureka-image
+    build: eurekaservice/
+    restart: always
+    network_mode: host
+    ports:
+      - 8761:8761
